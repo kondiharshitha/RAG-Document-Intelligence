@@ -1,6 +1,7 @@
 import json
 import sys
 from pathlib import Path
+import shutil
 
 from src.chunker import split_documents
 from src.document_loader import load_pdf
