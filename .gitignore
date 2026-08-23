@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+
+.venv/
+venv/
+env/
+
+.env
+
+.streamlit/secrets.toml
+
+chroma_db/
+
+data/*.pdf
+
+.DS_Store
