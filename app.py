@@ -57,8 +57,6 @@ if "chunks_created" not in st.session_state:
 
 with st.sidebar:
 
-    with st.sidebar:
-
     st.header("Configuration")
 
     groq_api_key = st.secrets.get(
