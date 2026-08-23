@@ -27,7 +27,7 @@ st.title("📚 RAG Document Intelligence")
 
 st.write(
     "Upload documents and ask questions using "
-    "evidence-grounded retrieval augmented generation."
+    "evidence-grounded Retrieval-Augmented Generation."
 )
 
 
@@ -59,21 +59,10 @@ with st.sidebar:
 
     st.header("Configuration")
 
+    # Get Groq API key from Streamlit Secrets
     groq_api_key = st.secrets.get(
         "GROQ_API_KEY",
         "",
-    )
-
-    uploaded_files = st.file_uploader(
-        "Upload PDF documents",
-        type=["pdf"],
-        accept_multiple_files=True,
-    )
-
-    build_button = st.button(
-        "Build Knowledge Base",
-        type="primary",
-        use_container_width=True,
     )
 
     uploaded_files = st.file_uploader(
@@ -98,7 +87,8 @@ if build_button:
     if not groq_api_key:
 
         st.error(
-            "Please enter your Groq API key."
+            "GROQ_API_KEY is not configured in "
+            "Streamlit Secrets."
         )
 
     elif not uploaded_files:
@@ -142,7 +132,7 @@ if build_button:
                     st.stop()
 
                 # ------------------------------------------
-                # 2. Split into chunks
+                # 2. Split documents into chunks
                 # ------------------------------------------
 
                 chunks = split_documents(
@@ -155,12 +145,10 @@ if build_button:
                 # 3. Create embedding model
                 # ------------------------------------------
 
-                embedding_model = (
-                    get_embedding_model()
-                )
+                embedding_model = get_embedding_model()
 
                 # ------------------------------------------
-                # 4. Store embeddings in Chroma
+                # 4. Create Chroma vector store
                 # ------------------------------------------
 
                 vector_store = create_vector_store(
@@ -169,7 +157,7 @@ if build_button:
                 )
 
                 # ------------------------------------------
-                # 5. Create LLM
+                # 5. Create Groq LLM
                 # ------------------------------------------
 
                 llm = create_llm(
@@ -177,7 +165,7 @@ if build_button:
                 )
 
                 # ------------------------------------------
-                # Save to session state
+                # 6. Save everything in session state
                 # ------------------------------------------
 
                 st.session_state.vector_store = (
@@ -205,7 +193,7 @@ if build_button:
         except Exception as error:
 
             st.error(
-                f"An error occurred while processing "
+                "An error occurred while processing "
                 f"the documents: {error}"
             )
 
@@ -262,7 +250,7 @@ if st.session_state.vector_store is not None:
     question = st.text_input(
         "Question",
         placeholder=(
-            "e.g. What was the company's revenue?"
+            "Ask something about your documents..."
         ),
     )
 
@@ -283,6 +271,10 @@ if st.session_state.vector_store is not None:
 
             try:
 
+                # ------------------------------------------
+                # Retrieve relevant chunks
+                # ------------------------------------------
+
                 with st.spinner(
                     "Searching the knowledge base..."
                 ):
@@ -297,6 +289,10 @@ if st.session_state.vector_store is not None:
                         )
                     )
 
+                # ------------------------------------------
+                # Generate grounded answer
+                # ------------------------------------------
+
                 with st.spinner(
                     "Generating answer..."
                 ):
@@ -310,7 +306,7 @@ if st.session_state.vector_store is not None:
                     )
 
                 # ------------------------------------------
-                # Answer
+                # Display answer
                 # ------------------------------------------
 
                 st.subheader(
@@ -320,57 +316,65 @@ if st.session_state.vector_store is not None:
                 st.write(answer)
 
                 # ------------------------------------------
-                # Retrieved sources
+                # Display retrieved sources
                 # ------------------------------------------
 
                 st.subheader(
                     "📚 Retrieved Sources"
                 )
 
-                for index, (
-                    document,
-                    score,
-                ) in enumerate(
-                    retrieved_documents,
-                    start=1,
-                ):
+                if not retrieved_documents:
 
-                    source = document.metadata.get(
-                        "source",
-                        "Unknown",
+                    st.info(
+                        "No relevant documents were retrieved."
                     )
 
-                    page = document.metadata.get(
-                        "page",
-                        "Unknown",
-                    )
+                else:
 
-                    chunk_id = document.metadata.get(
-                        "chunk_id",
-                        "Unknown",
-                    )
-
-                    with st.expander(
-                        f"Source {index} — "
-                        f"{source} | Page {page}"
+                    for index, (
+                        document,
+                        score,
+                    ) in enumerate(
+                        retrieved_documents,
+                        start=1,
                     ):
 
-                        st.write(
-                            f"**Chunk ID:** {chunk_id}"
+                        source = document.metadata.get(
+                            "source",
+                            "Unknown",
                         )
 
-                        st.write(
-                            f"**Distance score:** "
-                            f"{score:.4f}"
+                        page = document.metadata.get(
+                            "page",
+                            "Unknown",
                         )
 
-                        st.write(
-                            document.page_content
+                        chunk_id = document.metadata.get(
+                            "chunk_id",
+                            "Unknown",
                         )
+
+                        with st.expander(
+                            f"Source {index} — "
+                            f"{source} | Page {page}"
+                        ):
+
+                            st.write(
+                                f"**Chunk ID:** {chunk_id}"
+                            )
+
+                            st.write(
+                                f"**Distance score:** "
+                                f"{score:.4f}"
+                            )
+
+                            st.write(
+                                document.page_content
+                            )
 
             except Exception as error:
 
                 st.error(
-                    f"An error occurred while answering "
+                    "An error occurred while answering "
                     f"the question: {error}"
                 )
