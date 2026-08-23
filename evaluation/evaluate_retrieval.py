@@ -13,7 +13,7 @@ from src.retriever import retrieve_documents
 # Configuration
 # --------------------------------------------------
 
-PDF_PATH = "sampletest_project2.pdf"
+PDF_PATH = "data/sampletest_project2.pdf"
 
 QUESTIONS_PATH = Path(
     "evaluation/questions.json"
