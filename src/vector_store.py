@@ -11,6 +11,8 @@ PERSIST_DIRECTORY = "chroma_db"
 def create_vector_store(
     documents: List[Document],
     embedding_model,
+    persist_directory: str = PERSIST_DIRECTORY,
+    collection_name: str = COLLECTION_NAME,
 ):
     """
     Create a persistent Chroma vector store
@@ -20,8 +22,8 @@ def create_vector_store(
     vector_store = Chroma.from_documents(
         documents=documents,
         embedding=embedding_model,
-        collection_name=COLLECTION_NAME,
-        persist_directory=PERSIST_DIRECTORY,
+        collection_name=collection_name,
+        persist_directory=persist_directory,
     )
 
     return vector_store
