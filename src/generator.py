@@ -4,7 +4,7 @@ from langchain_core.documents import Document
 from langchain_groq import ChatGroq
 
 
-MODEL_NAME = "llama-3.3-70b-versatile"
+MODEL_NAME = "openai/gpt-oss-120b"
 
 
 def create_llm(api_key: str):
