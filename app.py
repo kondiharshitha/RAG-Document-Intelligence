@@ -57,12 +57,25 @@ if "chunks_created" not in st.session_state:
 
 with st.sidebar:
 
+    with st.sidebar:
+
     st.header("Configuration")
 
-    groq_api_key = st.text_input(
-        "Groq API Key",
-        type="password",
-        help="Enter your Groq API key.",
+    groq_api_key = st.secrets.get(
+        "GROQ_API_KEY",
+        "",
+    )
+
+    uploaded_files = st.file_uploader(
+        "Upload PDF documents",
+        type=["pdf"],
+        accept_multiple_files=True,
+    )
+
+    build_button = st.button(
+        "Build Knowledge Base",
+        type="primary",
+        use_container_width=True,
     )
 
     uploaded_files = st.file_uploader(
